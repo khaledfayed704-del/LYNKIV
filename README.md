@@ -55,12 +55,12 @@
 ## التثبيت
 
 ```bash
-git clone https://github.com/<your-username>/LYNIKV-TOOL-Qr.git
-cd LYNIKV-TOOL-Qr
+git clone https://github.com/khaledfayed704-del/LYNKIV.git
+cd LYNKIV
 
 python -m venv .venv
 .venv\Scripts\activate          # على ويندوز
-# source .venv/bin/activate     # على لينكس/ماك
+# source .venv/bin/activate     # على لينكس/ماك/Termux
 
 pip install -r requirements.txt
 python -m playwright install chrome
@@ -239,8 +239,8 @@ stop.bat
 3. **موقع التعلّم** — `https://me-tp.qureo.education/api/study`
 4. **الحل** — مراجعة المحاضرات ثم أسئلة الاختبار، مع إعادة محاولة حتى 5 محاولات لكل سؤال
 
-**وضع بدون ذكاء اصطناعي:** فعّل «بدون ذكاء اصطناعي» في تبويب QuREO — тогда الإجابات تُحلّ
-بمنطق القاعدة فقط بدون أي استدعاء لنموذج خارجي.
+**وضع بدون ذكاء اصطناعي:** فعّل «بدون ذكاء اصطناعي» في تبويب QuREO، فتُحل الإجابات بمنطق القاعدة فقط
+بدون أي استدعاء لنموذج خارجي.
 
 > **ملاحظة:** الأداة تعمل بحسابك أنت فقط. لا تُخزَّن أي بيانات دخول في الكود أو Git.
 > تأكد أن استخدامك يلتزم بشروط منصة QuREO وسياستها التدريبية.
@@ -303,7 +303,7 @@ build_exe.bat
 - **اللوحة تستمع على `127.0.0.1` فقط** — غير متاحة من الشبكة
 - الملفات الحساسة مستثناة في `.gitignore`:
   `config.json` · `.secret_key` · `browser_profile/` · `logs/` · `media/` · `dist/` · `build/` · الأرشيفات
-- **إن نشرت مفتاحاً بالخطأ:** أزله فوراً من تاريخ Git، وصدار مفتاحاً جديداً من لوحة المزوّد — فحذف الملف وحده لا يكفي
+- **إن نشرت مفتاحاً بالخطأ:** أزله فوراً من تاريخ Git، وأصدر مفتاحاً جديداً من لوحة المزوّد — فحذف الملف وحده لا يكفي
 
 ---
 
@@ -351,6 +351,8 @@ real Chrome instance via Playwright until the task is done, then returns a final
 - **Encrypted key storage**, a whitelist-filtered settings API, and a Windows `.exe` build
 
 ```bash
+git clone https://github.com/khaledfayed704-del/LYNKIV.git
+cd LYNKIV
 pip install -r requirements.txt
 python -m playwright install chrome
 python main.py --panel-only
