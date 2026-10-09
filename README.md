@@ -56,49 +56,43 @@
 
 ```bash
 git clone https://github.com/khaledfayed704-del/LYNKIV.git
-cd LYNKIV
+cd LYNKIV/lynikv
 
-python -m venv .venv
-.venv\Scripts\activate          # على ويندوز
-# source .venv/bin/activate     # على لينكس/ماك/Termux
-
-pip install -r requirements.txt
-python -m playwright install chrome
+chmod +x run.sh
+./run.sh --install      # يثبّت python + requests تلقائياً
 ```
 
-> على ويندوز يمكن ببساطة تشغيل `run.bat` — يكتشف نقص التبعيات ويثبتها تلقائياً.
+أو يدويًا:
+
+```bash
+pip install -r requirements.txt   # playwright>=1.44, requests>=2.31
+```
+
+> **على Termux/أندرويد:** مفيش نسخة Playwright للأندرويد، فأدوات المتصفح
+> (فتح صفحات، نقر، تعبئة) مش متاحة، لكن اللوحة كاملة وحلّ QuREO بيشتغل عن
+> طريق HTTP مباشرة بدل المتصفح. التفاصيل في `FIRST_RUN.txt`.
 
 ---
 
 ## التشغيل
 
-### واجهة رسومية (GUI)
+### عبر run.sh (الطريقة الموصى بها)
 
-```bat
-run_gui.bat
+```bash
+./run.sh              # لوحة التحكم على http://127.0.0.1:8770
+./run.sh --cli         # الطرفية الكاملة (الوكيل داخل Terminal)
+./run.sh --status      # حالة الخادم
+./run.sh --stop        # إيقاف الخادم
+./run.sh -- --headless # تمرير خيارات إضافية لـ main.py
 ```
 
-### سطر الأوامر
-
-```bat
-run.bat
-```
-
-أو مباشرة:
+### مباشرة عبر main.py
 
 ```bash
 python main.py --panel-only          # لوحة التحكم فقط
 python main.py -c "افتح example.com واكتب عنوانه"
 python main.py --qureo               # تشغيل حل QuREO مباشرة
 ```
-
-### إيقاف الأداة
-
-```bat
-stop.bat
-```
-
-يغلق الأداة وجميع عمليات المتصفح وينظّف الملفات المؤقتة.
 
 ---
 
@@ -247,52 +241,56 @@ stop.bat
 
 ---
 
-## بناء نسخة exe
+## بناء نسخة exe (ويندوز فقط)
 
-```bat
-build_exe.bat
-```
-
-الناتج: `dist\LYNIKV TOOL Qr\LYNIKV TOOL Qr.exe`
-
-- انشر المجلد `dist\LYNIKV TOOL Qr` **بالكامل** إلى أي جهاز — لا تنسخ الـ exe وحده
-- الإعداد في `LYNIKV.spec`
-- السكربت ASCII-only لتفادي أخطاء cmd في ترميزات Windows
-
-**اختبار سريع بعد البناء:**
-
-```bat
-"dist\LYNIKV TOOL Qr\LYNIKV TOOL Qr.exe" --selftest
-```
-
-يكتب النتيجة في `logs\qt_selftest.txt` ويتحقق من: عنوان الـ backend · `/api/state` · تحميل الصفحة · عنوان المستند.
+> غير منطبق على هذه الحزمة (نسخة Termux/Linux). لو عندك نسخة مصدر كاملة
+> لويندوز فيها `qt_app.py` و`LYNIKV.spec`، استخدم PyInstaller يدويًا:
+>
+> ```bash
+> pip install pyinstaller
+> pyinstaller --onefile --windowed --name "LYNIKV TOOL Qr" --icon assets/logo.ico qt_app.py
+> ```
+>
+> الملفات دي مش موجودة في الحزمة الحالية، فالقسم ده للمرجعية فقط.
 
 ---
 
 ## بنية المشروع
 
+الملفات الفعلية الموجودة في هذه الحزمة (نسخة Linux/Termux):
+
 ```
-.
+lynikv/
 ├── main.py              # نقطة الدخول: الوكيل، الخيط، مجدول المهام
-├── qt_app.py            # غلاف PySide6 + QWebEngineView + وضع selftest
+├── run.sh                # مشغّل لينكس/أندرويد (Termux) — panel / cli / install / status / stop
+├── requirements.txt      # playwright>=1.44 · requests>=2.31
+├── FIRST_RUN.txt          # دليل تشغيل سريع على Termux بالعربي
+├── README.md
+├── LICENSE
 ├── core/
-│   ├── browser.py       # Playwright: الجلسة، المتصفح، الاستعادة التلقائية
-│   ├── panel.py         # خادم اللوحة + واجهة API
-│   ├── panel.html       # واجهة اللوحة (HTML/CSS/JS متصلة)
-│   ├── ai_provider.py   # Groq, OpenAI, OpenRouter, Together, DeepSeek, Anthropic, Gemini
-│   ├── qureo.py         # عميل QuREO: بوابة، SSO، API، حل الفصول
-│   ├── tools.py         # تعريف 22 أداة + منفّذها
-│   ├── planner.py       # موجّه الوكيل وتعليماته
-│   ├── config.py        # إدارة الإعدادات + مفتاح مشفّر
-│   ├── crypto.py        # تشفير المفتاح (Fernet)
-│   ├── logbus.py        # سجل دائري برقوم تسلسلية
-│   ├── ui.py            # مخرجات الطرفية
-│   └── inspect_map.py   # خريطة الأدوات للوحة
-├── assets/              # الشعار والأيقونة
-├── run.bat / run_gui.bat / stop.bat
-├── build_exe.bat
-└── LYNIKV.spec
+│   ├── __init__.py
+│   ├── browser.py        # Playwright: الجلسة، المتصفح، الاستعادة التلقائية
+│   ├── panel.py           # خادم اللوحة + واجهة API
+│   ├── panel.html         # واجهة اللوحة (HTML/CSS/JS متصلة)
+│   ├── ai_provider.py     # Groq, OpenAI, OpenRouter, Together, DeepSeek, Anthropic, Gemini
+│   ├── qureo.py           # عميل QuREO: بوابة، SSO، API، حل الفصول (HTTP مباشر على أندرويد)
+│   ├── tools.py           # تعريف 22 أداة + منفّذها
+│   ├── planner.py         # موجّه الوكيل وتعليماته
+│   ├── config.py          # إدارة الإعدادات + مفتاح مشفّر
+│   ├── crypto.py          # تشفير المفتاح (Fernet)
+│   ├── logbus.py          # سجل دائري برقوم تسلسلية
+│   ├── ui.py              # مخرجات الطرفية
+│   ├── inspect_map.py     # خريطة الأدوات للوحة
+│   └── banner.txt
+└── assets/
+    ├── logo.ico
+    └── logo.png
 ```
+
+> **ملحوظة:** ملفات `qt_app.py`، `run.bat`/`run_gui.bat`/`stop.bat`، `build_exe.bat`،
+> و`LYNIKV.spec` المذكورة في نسخ سابقة من التوثيق **غير موجودة** في هذه الحزمة —
+> النسخة دي مخصصة لـ Linux/Termux وتعتمد على `run.sh` فقط، بدون واجهة Qt رسومية
+> أو بناء exe لويندوز.
 
 ---
 
@@ -352,10 +350,8 @@ real Chrome instance via Playwright until the task is done, then returns a final
 
 ```bash
 git clone https://github.com/khaledfayed704-del/LYNKIV.git
-cd LYNKIV
-pip install -r requirements.txt
-python -m playwright install chrome
-python main.py --panel-only
+cd LYNKIV/lynikv
+chmod +x run.sh && ./run.sh
 ```
 
 The QuREO solver runs **under your own account only**. Make sure your usage complies with the
