@@ -4,10 +4,10 @@
 
 **وكيل ذكاء اصطناعي عربي للتحكم في المتصفح + حلال QuREO التلقائي**
 
-لوحة تحكم ويب neo-brutalist · 22 أداة · 7 مزوّدات ذكاء اصطناعي · دعم كامل للعربية (RTL)
+نسخة محمية (Encrypted Build) · 22 أداة · 7 مزوّدات ذكاء اصطناعي · دعم كامل للعربية (RTL)
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Playwright](https://img.shields.io/badge/Playwright-1.44+-2EAD33?logo=playwright&logoColor=white)](https://playwright.dev/)
+[![Protected](https://img.shields.io/badge/Build-Encrypted-success)]()
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 </div>
@@ -16,77 +16,91 @@
 
 ## نبذة
 
-`LYNIKV TOOL Qr` أداة سطح مكتب تعمل بواجهة سطر أوامر وواجهة رسومية، ووحدة تحكم ويب محلية.
-تعطيها أمراً بالعربية، فتتصرف في متصفح حقيقي عبر Playwright حتى تنجز المطلوب، ثم ترجع بجواب نهائي.
+`LYNIKV TOOL Qr` وكيل ذكاء اصطناعي عربي يتحكم في متصفح حقيقي عبر Playwright لتنفيذ أوامرك،
+بالإضافة إلى **حلال QuREO** التلقائي لمحاضرات وأسئلة الكورسات المفعّلة في حسابك (مع وضع **بدون
+ذكاء اصطناعي** بالكامل).
 
-بالإضافة إلى ذلك، تحتوي الأداة على **حلال QuREO** يكمّل محاضرات وأسئلة الكورسات المفعّلة في حسابك
-تلقائياً، مع إمكانية الحل **بدون ذكاء اصطناعي** إطلاقاً.
+هذه نسخة **بناء محمي (encrypted build)**: الكود المصدري الحقيقي غير موجود كملفات `.py` منفصلة،
+بل مجمّع ومشفّر داخل ملف واحد يقرأه محمّل (`main.py`) وقت التشغيل فقط.
 
 **التطوير:** [Lynox](https://lynkiv.duckdns.org/) · **Kivix**
 
 ---
 
-## المميزات
+## الملفات الفعلية في هذه الحزمة
 
-| الميزة | الوصف |
-|---|---|
-| **أوامر عربية** | اكتب طلبك بالعربية naturally، والوكيل يترجمه إلى خطوات على المتصفح |
-| **لوحة تحكم ويب** | واجهة كاملة على `127.0.0.1:8770` لإدارة كل الإعدادات والأدوات |
-| **22 أداة** | تنقل، قراءة، نقر، تعبئة، تبويبات، لقطات، وأدوات QuREO |
-| **7 مزوّدات** | Groq · OpenAI · OpenRouter · Together · DeepSeek · Anthropic · Gemini |
-| **اختيار الموديل** | قائمة موديلات محدّثة لكل مزوّد + اختبار الاتصال من اللوحة |
-| **حفظ مشفّر** | مفتاح API يُخزَّن مشفّراً في `config.json` ولا يظهر أبداً في الواجهة |
-| **جلسة QuREO محفوظة** | تسجيل دخول واحد، وتبقى الجلسة محفوظة في ملف تعريف المتصفح |
-| **نسخة exe** | بناء Windows موقّع من مجلد واحد عبر PyInstaller |
-| **استجابة كاملة** | الواجهة تعمل من 320px حتى الشاشات العريضة |
-| **سمة داكنة/فاتحة** | تبديل فوري مع حفظ الاختيار |
+```
+.
+├── main.py              # المحمّل (loader) — يفك تشفير _lynikv.dat وقت التشغيل فقط، لا يُعدَّل
+├── _lynikv.dat            # الحزمة المشفّرة: كل كود الأداة (22 أداة + اللوحة + QuREO...) + أصول + HTML
+├── config.json             # إعدادات التشغيل (يُنشأ/يُحدَّث تلقائياً، مفتاح الـ API فاضي افتراضياً)
+├── run.sh                   # مشغّل لينكس/أندرويد (Termux)
+├── requirements.txt          # playwright>=1.44 · requests>=2.31
+├── FIRST_RUN.txt               # دليل تشغيل سريع على Termux بالعربي
+├── README.md
+└── LICENSE
+```
+
+> لا يوجد مجلد `core/` ولا `assets/` ظاهر على القرص — كل شيء (الكود، `panel.html`،
+> `banner.txt`، `logo.png`) مضغوط جوه `_lynikv.dat` ويُقدَّم من الذاكرة مباشرة وقت التشغيل.
+
+---
+
+## آلية الحماية (Encrypted Build)
+
+- **تشفير الحزمة**: `_lynikv.dat` مشفّر بخوارزمية مبنية على HMAC-SHA256 (stream cipher)، ومضغوط بـ gzip فوق أرشيف tar.
+- **تحقق التكامل**: كل حزمة موقّعة بـ HMAC على المحتوى كامل (salt + nonce + tag) — أي تعديل ولو بايت واحد يفشّل التحقق ويرفض التشغيل.
+- **حماية المحمّل نفسه**: `main.py` بيتحقق من `sha256` الخاص به مقابل القيمة المسجّلة وقت البناء — لو اتعدّل، الأداة ترفض تشتغل.
+- **ملفات في الذاكرة فقط**: `panel.html`، `banner.txt`، و`assets/logo.png` بيتقدموا من الذاكرة مباشرة عبر حارس (guard) على `open`/`pathlib.Path` — مفيش نسخة مفكوكة منهم على القرص أبداً.
+- **ربط بالمالك**: الحزمة فيها حقل `owner` موقّع لازم يطابق قيمة مبنية في المحمّل.
+
+### أوامر التحقق المدمجة
+
+```bash
+python main.py --protect-verify     # يعرض توقيع الحزمة، المالك، تاريخ البناء، عدد الملفات
+python main.py --protect-selftest   # يشغّل اختبار ذاتي كامل (استيراد، خريطة الأدوات، الذاكرة)
+```
+
+مثال ناتج `--protect-verify`:
+```
+[✓] التوقيع رقمي على الحزمة سليم — لم يُمسّ المحتوى
+    الأداة     : LYNIKV TOOL Qr
+    المالك     : Lynox & Kivix
+    ملفات الشيفرة: 13 · ملفات في الذاكرة: 4
+```
 
 ---
 
 ## المتطلبات
 
-- **Windows** 10/11 (أو Linux/macOS للتشغيل من المصدر)
-- **Python** 3.10 أو أحدث *(تم التطوير والاختبار على 3.14.8)*
-- **Chrome** أو Chromium — يثبّته Playwright تلقائياً بأمر واحد
+- **Python** 3.10 أو أحدث
+- **Linux / Termux (أندرويد)** — هذه الحزمة مبنية لهذه البيئة
+- `requests` (أساسي) و`playwright` (اختياري — أدوات المتصفح فقط، غير متاح على أندرويد)
 - اتصال إنترنت للوصول إلى مزوّد الذكاء الاصطناعي
 
 ---
 
-## التثبيت
+## التثبيت والتشغيل
 
 ```bash
 git clone https://github.com/khaledfayed704-del/LYNKIV.git
-cd LYNKIV/lynikv
+cd LYNKIV
 
 chmod +x run.sh
-./run.sh --install      # يثبّت python + requests تلقائياً
+./run.sh --install     # يثبّت python + requests تلقائياً
+./run.sh                 # يشغّل اللوحة على http://127.0.0.1:8770
 ```
 
-أو يدويًا:
+أوامر `run.sh` الأخرى:
 
 ```bash
-pip install -r requirements.txt   # playwright>=1.44, requests>=2.31
+./run.sh --cli          # الطرفية الكاملة (الوكيل داخل Terminal)
+./run.sh --status        # حالة الخادم
+./run.sh --stop           # إيقاف الخادم
+./run.sh -- --headless     # تمرير خيارات لـ main.py (مثل تشغيل المتصفح بلا نافذة)
 ```
 
-> **على Termux/أندرويد:** مفيش نسخة Playwright للأندرويد، فأدوات المتصفح
-> (فتح صفحات، نقر، تعبئة) مش متاحة، لكن اللوحة كاملة وحلّ QuREO بيشتغل عن
-> طريق HTTP مباشرة بدل المتصفح. التفاصيل في `FIRST_RUN.txt`.
-
----
-
-## التشغيل
-
-### عبر run.sh (الطريقة الموصى بها)
-
-```bash
-./run.sh              # لوحة التحكم على http://127.0.0.1:8770
-./run.sh --cli         # الطرفية الكاملة (الوكيل داخل Terminal)
-./run.sh --status      # حالة الخادم
-./run.sh --stop        # إيقاف الخادم
-./run.sh -- --headless # تمرير خيارات إضافية لـ main.py
-```
-
-### مباشرة عبر main.py
+أو مباشرة عبر بايثون:
 
 ```bash
 python main.py --panel-only          # لوحة التحكم فقط
@@ -94,59 +108,54 @@ python main.py -c "افتح example.com واكتب عنوانه"
 python main.py --qureo               # تشغيل حل QuREO مباشرة
 ```
 
+> **على Termux/أندرويد:** Playwright غير متاح، فأدوات المتصفح (فتح صفحات، نقر، تعبئة)
+> غير مفعّلة، لكن اللوحة كاملة وحلّ QuREO يعمل عبر HTTP مباشرة (`qureo.transport: auto`).
+> التفاصيل في `FIRST_RUN.txt`.
+
 ---
 
-## خيارات سطر الأوامر
+## الإعدادات (config.json)
 
-| الخيار | الوظيفة |
-|---|---|
-| `-c`, `--command` | تنفيذ أمر واحد ثم الخروج |
-| `--qureo` | تشغيل مسار حل QuREO مباشرة |
-| `--headless` | تشغيل المتصفح بدون نافذة مرئية |
-| `--panel-only` | فتح لوحة التحكم فقط بدون وكيل |
-| `--no-panel` | تعطيل لوحة التحكم |
-| `--no-color` | إخراج بدون ألوان الطرفية |
-| `--steps N` | الحد الأقصى لخطوات الوكيل |
-| `--show-results` | عرض النتائج الخام أثناء التنفيذ |
+يُنشأ تلقائياً عند أول تشغيل بهذه القيم الافتراضية:
+
+```json
+{
+  "ai": {
+    "provider": "groq", "model": "", "base_url": "", "api_key": "",
+    "temperature": 0.1, "max_steps": 14, "max_tokens": 4000,
+    "timeout": 120, "extra_instructions": ""
+  },
+  "browser": {
+    "headless": false, "channel": "chrome", "user_data_dir": "browser_profile",
+    "locale": "ar-EG", "viewport_width": 1360, "viewport_height": 850,
+    "timeout_ms": 30000, "slow_mo": 0, "search_engine": "duckduckgo",
+    "downloads_path": "media", "max_snapshot_items": 60
+  },
+  "ui": { "color": false, "show_steps": true, "show_raw_results": false, "show_banner": true, "banner_text": "" },
+  "panel": { "enabled": true, "open_on_start": true, "host": "127.0.0.1", "port": 8770 },
+  "qureo": {
+    "course": "python_short_ar", "section_id": 0,
+    "course_url": "https://me-tp.qureo.education/course/python_short_ar",
+    "delay_seconds": 0.0, "use_ai": false, "max_attempts": 5, "transport": "auto"
+  }
+}
+```
+
+**المزوّدون المدعومون:** Groq · OpenAI · OpenRouter · Together AI · DeepSeek · Anthropic · Google Gemini
+
+> مفتاح الـ API يُخزَّن مشفّراً داخل `config.json` ولا يظهر أبداً في الواجهة. لا تنشر
+> `config.json` بعد ما تحطّ فيه مفتاح حقيقي — انشر النسخة الافتراضية (الفاضية) فقط.
 
 ---
 
 ## لوحة التحكم
 
-تُفتح تلقائياً عند التشغيل على <http://127.0.0.1:8770/>
+تُفتح تلقائياً على <http://127.0.0.1:8770/> — عشرة تبويبات: **QuREO · التشغيل · الذكاء
+الاصطناعي · المفتاح والأمان · المتصفح · الواجهة · خريطة الأدوات · السجل المباشر ·
+المطورون · عن الأداة**.
 
-عشرة تبويبات: **QuREO · التشغيل · الذكاء الاصطناعي · المفتاح والأمان · المتصفح · الواجهة · خريطة الأدوات · السجل المباشر · المطورون · عن الأداة**
-
-### واجهة برمجية (API)
-
-كل النداءات تمر عبر نقطة واحدة على `127.0.0.1` فقط — لا يوجد أي اتصال خارجي من اللوحة.
-
-**طلبات GET**
-
-| المسار | الوصف |
-|---|---|
-| `/` · `/index.html` | صفحة اللوحة |
-| `/api/state` | الحالة الكاملة: الإعدادات، المزوّد، هل المتصفح يعمل، هل مشغول |
-| `/api/logs?after=N` | السجلات بعد الرقم التسلسلي `N` |
-| `/api/tools` | خريطة الأدوات الـ22 مع الملفات وأرقام الأسطر |
-| `/assets/<file>` | الشعار والأصول |
-
-**طلبات POST**
-
-| المسار | الجسم | الوظيفة |
-|---|---|---|
-| `/api/settings` | `{"settings":{...}}` | حفظ الإعدادات المسموح بها فقط |
-| `/api/key` | `{"key":"..."}` | حفظ مفتاح API مشفّراً |
-| `/api/test` | `{}` | اختبار الاتصال بالمزوّد |
-| `/api/models` | `{}` | جلب قائمة الموديلات |
-| `/api/browser` | `{"action": "start أو stop أو restart أو info"}` | التحكم في المتصفح |
-| `/api/run` | `{"command":"..."}` | تنفيذ أمر عربي |
-| `/api/qureo/solve` | `{"course","student_id","password","delay","use_ai"}` | بدء جولة حل |
-| `/api/reset` | `{}` | استعادة الإعدادات الافتراضية |
-| `/api/clear-logs` | `{}` | مسح السجل |
-| `/api/shutdown` | `{}` | إغلاق الأداة |
-
-> الإعدادات تُرشَّح بقائمة بيضاء (`ALLOWED` في `core/panel.py`) — أي مسار غير معروف يُرفض.
+كل نداءات الـ API تمر عبر `127.0.0.1` فقط — لا يوجد اتصال خارجي من اللوحة، والإعدادات
+مُرشَّحة بقائمة بيضاء (أي مسار غير معروف يُرفض).
 
 ---
 
@@ -162,200 +171,49 @@ python main.py --qureo               # تشغيل حل QuREO مباشرة
 | **QuREO** | `qureo_status` · `qureo_chapters` · `qureo_login` · `qureo_solve_chapter` · `qureo_solve_course` |
 | **إنهاء** | `finish` |
 
-تبويب **خريطة الأدوات** يعرض لكل أداة ملفها المنفّذ ورقم السطر والدوال التي تستدعيها.
-
----
-
-## الإعدادات
-
-كل الإعدادات في `config.json` (يُنشأ تلقائياً). القيم الافتراضية:
-
-```json
-{
-  "ai": {
-    "provider": "groq",
-    "model": "",
-    "base_url": "",
-    "api_key": "",
-    "temperature": 0.1,
-    "max_steps": 14,
-    "max_tokens": 4000,
-    "timeout": 120,
-    "extra_instructions": ""
-  },
-  "browser": {
-    "headless": false,
-    "channel": "chrome",
-    "user_data_dir": "browser_profile",
-    "locale": "ar-EG",
-    "viewport_width": 1360,
-    "viewport_height": 850,
-    "timeout_ms": 30000,
-    "slow_mo": 0,
-    "search_engine": "duckduckgo",
-    "downloads_path": "media",
-    "max_snapshot_items": 60
-  },
-  "ui": {
-    "color": true,
-    "show_steps": true,
-    "show_raw_results": false,
-    "show_banner": true,
-    "banner_text": ""
-  },
-  "panel": {
-    "enabled": true,
-    "open_on_start": true,
-    "host": "127.0.0.1",
-    "port": 8770
-  },
-  "qureo": {
-    "course": "python_short_ar",
-    "section_id": 106,
-    "course_url": "https://me-tp.qureo.education/course/python_short_ar",
-    "delay_seconds": 3,
-    "use_ai": true,
-    "max_attempts": 5
-  }
-}
-```
-
-**المزوّدون المدعومون:** Groq · OpenAI · OpenRouter · Together AI · DeepSeek · Anthropic · Google Gemini
-
 ---
 
 ## QuREO
 
-مسار حل كامل من البوابة إلى إكمال الفصول:
-
 1. **البوابة** — `https://me-portal.qureo.education` (تسجيل دخول)
-2. **تفعيل الجلسة** — الضغط على `div.course-card` لفتح جلسة موقع التعلّم
+2. **تفعيل الجلسة** — فتح جلسة موقع التعلّم
 3. **موقع التعلّم** — `https://me-tp.qureo.education/api/study`
-4. **الحل** — مراجعة المحاضرات ثم أسئلة الاختبار، مع إعادة محاولة حتى 5 محاولات لكل سؤال
+4. **الحل** — مراجعة المحاضرات ثم الأسئلة، حتى 5 محاولات لكل سؤال
 
-**وضع بدون ذكاء اصطناعي:** فعّل «بدون ذكاء اصطناعي» في تبويب QuREO، فتُحل الإجابات بمنطق القاعدة فقط
-بدون أي استدعاء لنموذج خارجي.
+**وضع بدون ذكاء اصطناعي:** فعّل «بدون ذكاء اصطناعي» في تبويب QuREO لحل بمنطق القاعدة فقط.
 
-> **ملاحظة:** الأداة تعمل بحسابك أنت فقط. لا تُخزَّن أي بيانات دخول في الكود أو Git.
-> تأكد أن استخدامك يلتزم بشروط منصة QuREO وسياستها التدريبية.
-
----
-
-## بناء نسخة exe (ويندوز فقط)
-
-> غير منطبق على هذه الحزمة (نسخة Termux/Linux). لو عندك نسخة مصدر كاملة
-> لويندوز فيها `qt_app.py` و`LYNIKV.spec`، استخدم PyInstaller يدويًا:
->
-> ```bash
-> pip install pyinstaller
-> pyinstaller --onefile --windowed --name "LYNIKV TOOL Qr" --icon assets/logo.ico qt_app.py
-> ```
->
-> الملفات دي مش موجودة في الحزمة الحالية، فالقسم ده للمرجعية فقط.
-
----
-
-## بنية المشروع
-
-الملفات الفعلية الموجودة في هذه الحزمة (نسخة Linux/Termux):
-
-```
-lynikv/
-├── main.py              # نقطة الدخول: الوكيل، الخيط، مجدول المهام
-├── run.sh                # مشغّل لينكس/أندرويد (Termux) — panel / cli / install / status / stop
-├── requirements.txt      # playwright>=1.44 · requests>=2.31
-├── FIRST_RUN.txt          # دليل تشغيل سريع على Termux بالعربي
-├── README.md
-├── LICENSE
-├── core/
-│   ├── __init__.py
-│   ├── browser.py        # Playwright: الجلسة، المتصفح، الاستعادة التلقائية
-│   ├── panel.py           # خادم اللوحة + واجهة API
-│   ├── panel.html         # واجهة اللوحة (HTML/CSS/JS متصلة)
-│   ├── ai_provider.py     # Groq, OpenAI, OpenRouter, Together, DeepSeek, Anthropic, Gemini
-│   ├── qureo.py           # عميل QuREO: بوابة، SSO، API، حل الفصول (HTTP مباشر على أندرويد)
-│   ├── tools.py           # تعريف 22 أداة + منفّذها
-│   ├── planner.py         # موجّه الوكيل وتعليماته
-│   ├── config.py          # إدارة الإعدادات + مفتاح مشفّر
-│   ├── crypto.py          # تشفير المفتاح (Fernet)
-│   ├── logbus.py          # سجل دائري برقوم تسلسلية
-│   ├── ui.py              # مخرجات الطرفية
-│   ├── inspect_map.py     # خريطة الأدوات للوحة
-│   └── banner.txt
-└── assets/
-    ├── logo.ico
-    └── logo.png
-```
-
-> **ملحوظة:** ملفات `qt_app.py`، `run.bat`/`run_gui.bat`/`stop.bat`، `build_exe.bat`،
-> و`LYNIKV.spec` المذكورة في نسخ سابقة من التوثيق **غير موجودة** في هذه الحزمة —
-> النسخة دي مخصصة لـ Linux/Termux وتعتمد على `run.sh` فقط، بدون واجهة Qt رسومية
-> أو بناء exe لويندوز.
+> الأداة تعمل بحسابك أنت فقط. تأكد أن استخدامك يلتزم بشروط منصة QuREO وسياستها التدريبية.
 
 ---
 
 ## الأمان
 
-- **مفتاح API** يُخزَّن مشفّراً في `config.json`، والمفتاح نفسه في `.secret_key`
-- **لا يوجد أي مفتاح أو كلمة مرور في الكود**، ولا في هذا المستودع
-- **اللوحة تستمع على `127.0.0.1` فقط** — غير متاحة من الشبكة
-- الملفات الحساسة مستثناة في `.gitignore`:
-  `config.json` · `.secret_key` · `browser_profile/` · `logs/` · `media/` · `dist/` · `build/` · الأرشيفات
-- **إن نشرت مفتاحاً بالخطأ:** أزله فوراً من تاريخ Git، وأصدر مفتاحاً جديداً من لوحة المزوّد — فحذف الملف وحده لا يكفي
+- الكود الحقيقي غير قابل للقراءة أو التعديل المباشر — مشفّر جوه `_lynikv.dat`.
+- أي تلاعب في `main.py` أو `_lynikv.dat` يفشّل تحقق التكامل ويوقف التشغيل فوراً.
+- **اللوحة تستمع على `127.0.0.1` فقط** — غير متاحة من الشبكة.
+- لا تُخزَّن أي بيانات دخول أو مفاتيح API في الكود نفسه.
 
 ---
 
 ## استكشاف الأخطاء
 
-**المتصفح لا يفتح / `Target page, context or browser has been closed`**
-الأداة تكشف موت جلسة Playwright وتعيد تشغيلها تلقائياً. اضغط «تشغيل المتصفح» مرة أخرى.
-تأكد من عدم وجود نافذة أخرى تستخدم `browser_profile` — الملف يُقفل من أول عملية فقط.
+**`الحزمة المشفّرة مفقودة أو غير صالحة`**
+تأكد أن `_lynikv.dat` في نفس مجلد `main.py` ولم يُعدَّل أو يُنقَل بشكل جزئي.
 
-**`Tool call validation failed` (خطأ 400 من Groq)**
-بعض الموديلات المنفتحة تُصدر أسماء أدوات مشوّهة. جرّب موديلاً مستقراً مثل `llama-3.3-70b-versatile` من تبويب **الذكاء الاصطناعي**.
+**`ملف المحمّل عُدّل عن نسخة البناء الأصلية`**
+لا تُعدّل `main.py` يدوياً إطلاقاً — أي تغيير فيه، حتى مسافة، يُفشل التحقق.
 
 **لوحة التحكم تفتح ثم تُغلق**
-منفذ `8770` مشغول. غيّر `panel.port` من تبويب **الواجهة**، ثم أعد تشغيل الأداة (المنفذ لا يُطبَّق إلا بعد إعادة التشغيل).
+منفذ `8770` مشغول. غيّر `panel.port` في `config.json`، ثم أعد تشغيل الأداة.
 
 **فشل تسجيل دخول QuREO**
-جرّب أولاً **بدون ذكاء اصطناعي** وبجلسة محفوظة. إن فشل، افحص `logs/login_fail.txt` والتقطة `logs/login_fail.png`.
-
-**توقّف المتصفح فجأة بعد إغلاقه يدوياً**
-اضغط على زر المتصفح مرة أخرى — الاستعادة التلقائية تعيد تشغيله. تأكد أن لا نافذة أخرى تستخدم مجلد `browser_profile`؛ القفل يسمح بعملية واحدة فقط.
-
----
-
-## المساهمة
-
-مستحسن: افتح issue أولاً لوصف المشكلة أو الميزة قبل أي تعديل كبير.
+جرّب أولاً **بدون ذكاء اصطناعي** وبجلسة محفوظة. التفاصيل في `FIRST_RUN.txt`.
 
 ---
 
 ## الترخيص
 
 MIT — انظر [LICENSE](LICENSE).
-
----
-
-## English summary
-
-**LYNIKV TOOL Qr** is an Arabic-first AI browser agent. Give it a command in Arabic and it drives a
-real Chrome instance via Playwright until the task is done, then returns a final answer.
-
-- **22 browser tools** across navigation, reading, interaction, tabs, control and QuREO
-- **7 AI providers**: Groq, OpenAI, OpenRouter, Together, DeepSeek, Anthropic, Gemini
-- **Local web panel** on `127.0.0.1:8770` with a tool map that shows the source file and line of every tool
-- **QuREO auto-solver** for activated courses, with an **AI-free mode**
-- **Encrypted key storage**, a whitelist-filtered settings API, and a Windows `.exe` build
-
-```bash
-git clone https://github.com/khaledfayed704-del/LYNKIV.git
-cd LYNKIV/lynikv
-chmod +x run.sh && ./run.sh
-```
-
-The QuREO solver runs **under your own account only**. Make sure your usage complies with the
-platform's terms of service.
 
 ---
 
